@@ -17,11 +17,9 @@ namespace PingService.Function
         public static void Run([TimerTrigger("0 */1 * * * *")]TimerInfo myTimer, ILogger log)
         {
 
-            string connectionString = "<connection string>";
+            string connectionString = "<insert connection string>";
             
             CloudTable table = InitCloudTable(connectionString);
-
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
             string targetHost = "bing.com";
             string data = "a quick brown fox jumped over the lazy dog";
@@ -39,10 +37,10 @@ namespace PingService.Function
 
             if (reply.Status == IPStatus.Success)
             {
-                AddEntity(true,targetHost,table);
+                AddEntity(true,table,reply);
             }
             else{
-                AddEntity(false,targetHost,table);
+                AddEntity(false, table, reply);
             }
 
             
@@ -59,26 +57,26 @@ namespace PingService.Function
             return table;            
         }
 
-        public static void AddEntity(bool isRunning, string targetHost, CloudTable table){
+        public static void AddEntity(bool isRunning, CloudTable table, PingReply ping){
 
             StatusEntity entity;
 
             if(isRunning == false){
 
                 entity = new StatusEntity {
-                    PartitionKey = "Ping",
-                    RowKey = targetHost,
-                    RoundtripTime = null,
+                    PartitionKey = ping.Address.ToString(),
+                    RowKey = "<unique rowkey>",
+                    RoundtripTime = ping.RoundtripTime.ToString(),
                     isRunning = false
                 };
             }
             else{
 
                 entity = new StatusEntity {
-                    PartitionKey = "Ping",
-                    RowKey = targetHost,
-                    RoundtripTime = null,
-                    isRunning = false
+                    PartitionKey = ping.Address.ToString(),
+                    RowKey = "<unique rowkey>",
+                    RoundtripTime = ping.RoundtripTime.ToString(),
+                    isRunning = true
                 };
             }            
 
